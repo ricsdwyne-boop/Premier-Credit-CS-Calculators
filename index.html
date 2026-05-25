@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Premier Credit Calculators</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  /* ── Shared launcher page ── */
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: #e8eaed;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 24px 14px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Horizontal selector ── */
+  .selector-wrap {
+    width: 100%;
+    max-width: 500px;
+    margin-bottom: 20px;
+  }
+  .selector-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #6b7280;
+    text-align: center;
+    margin-bottom: 10px;
+  }
+  .selector {
+    display: flex;
+    background: #d1d5db;
+    border-radius: 14px;
+    padding: 5px;
+    gap: 5px;
+  }
+  .sel-btn {
+    flex: 1;
+    padding: 13px 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #6b7280;
+    background: transparent;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    line-height: 1.3;
+    text-align: center;
+  }
+  .sel-btn.active {
+    background: #111111;
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  }
+  .sel-btn:not(.active):hover {
+    background: #c4c9d1;
+    color: #374151;
+  }
+
+  /* ── Calculator wrappers ── */
+  .calc-view { display: none; width: 100%; max-width: 500px; }
+  .calc-view.active { display: block; }
+
+  /* ══════════════════════════════════════════
+     CALCULATOR 1 — Affordability (Checkoff)
+  ══════════════════════════════════════════ */
+  :root {
+    --bg: #e8eaed;
+    --white: #ffffff;
+    --border: #d1d5db;
+    --border2: #e5e7eb;
+    --text: #111827;
+    --muted: #4b5563;
+    --dim: #9ca3af;
+    --green: #15803d;
+    --green-bg: #f0fdf4;
+    --green-border: #86efac;
+    --red: #b91c1c;
+    --red-bg: #fef2f2;
+    --red-border: #fca5a5;
+    --orange: #f97316;
+    --surface-dim: #f9fafb;
+  }
+
+  #calc1 .calc {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 22px;
+    width: 100%;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.11);
+    display: flex;
+    flex-direction: column;
+  }
+  #calc1 .title-bar {
+    background: #111111;
+    padding: 30px 24px;
+    text-align: center;
+  }
+  #calc1 .title-bar h1 {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: #ffffff;
+    line-height: 1.35;
+  }
+  #calc1 .title-bar p {
+    font-size: 11px;
+    color: rgba(255,255,255,0.42);
+    margin-top: 6px;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.05em;
+  }
+  #calc1 .body { padding: 18px; display: flex; flex-direction: column; gap: 11px; }
+  #calc1 .card {
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    border-radius: 13px;
+    padding: 15px 17px;
+  }
+  #calc1 .field-label {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: #111827;
+    text-transform: uppercase;
+    margin-bottom: 9px;
+  }
+  #calc1 .input-wrap {
+    display: flex;
+    align-items: center;
+    background: var(--surface-dim);
+    border: 1.5px solid var(--border);
+    border-radius: 9px;
+    overflow: hidden;
+    transition: border-color 0.15s;
+  }
+  #calc1 .input-wrap:focus-within { border-color: var(--orange); box-shadow: 0 0 0 3px rgba(249,115,22,0.1); }
+  #calc1 .currency {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: #6b7280;
+    padding: 0 12px;
+    border-right: 1.5px solid var(--border);
+    line-height: 42px;
+    height: 42px;
+    background: #f3f4f6;
+    white-space: nowrap;
+    font-weight: 500;
+  }
+  #calc1 .inp {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 20px;
+    font-weight: 500;
+    padding: 0 13px;
+    height: 42px;
+    text-align: right;
+    width: 100%;
+  }
+  #calc1 .inp::placeholder { color: #d1d5db; }
+  #calc1 .inp::-webkit-outer-spin-button,
+  #calc1 .inp::-webkit-inner-spin-button { -webkit-appearance: none; }
+  #calc1 .inp[type=number] { -moz-appearance: textfield; }
+  #calc1 .sec-card {
+    border: 1px solid var(--border2);
+    border-radius: 11px;
+    padding: 9px 15px;
+    background: var(--surface-dim);
+    opacity: 0.55;
+    transition: opacity 0.2s;
+  }
+  #calc1 .sec-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    user-select: none;
+  }
+  #calc1 .sec-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    color: #6b7280;
+    text-transform: uppercase;
+  }
+  #calc1 .sec-arrow { font-size: 10px; color: #9ca3af; }
+  #calc1 .sec-body {
+    display: none;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border2);
+  }
+  #calc1 .tbtn {
+    width: 42px;
+    height: 28px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--white);
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  #calc1 .tbtn.yes.active { background: var(--green-bg); border-color: var(--green-border); color: var(--green); }
+  #calc1 .tbtn.no.active  { background: var(--red-bg);   border-color: var(--red-border);   color: var(--red); }
+  #calc1 .below-fold { display: flex; flex-direction: column; gap: 11px; }
+  #calc1 .below-fold.hidden { display: none; }
+  #calc1 .adj-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--surface-dim);
+    border: 1px solid var(--border2);
+    border-radius: 11px;
+    padding: 12px 17px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: #4b5563;
+    text-transform: uppercase;
+  }
+  #calc1 .adj-val {
+    font-family: 'DM Mono', monospace;
+    font-size: 15px;
+    color: var(--text);
+    font-weight: 600;
+  }
+  #calc1 .result {
+    border-radius: 13px;
+    border: 1.5px solid var(--border);
+    background: var(--surface-dim);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 18px;
+    gap: 5px;
+    text-align: center;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  #calc1 .result.positive { background: var(--green-bg); border-color: var(--green-border); }
+  #calc1 .result.negative { background: var(--red-bg);   border-color: var(--red-border); }
+  #calc1 .result-tag {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #6b7280;
+  }
+  #calc1 .result.positive .result-tag { color: #166534; }
+  #calc1 .result.negative .result-tag { color: #991b1b; }
+  #calc1 .result-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 28px;
+    font-weight: 500;
+    color: var(--text);
+    letter-spacing: -0.02em;
+  }
+  #calc1 .result.positive .result-num { color: var(--green); }
+  #calc1 .result.negative .result-num { color: var(--red); }
+  #calc1 .result-verdict {
+    font-size: 12px;
+    color: #6b7280;
+  }
+  #calc1 .result.positive .result-verdict { color: #166534; }
+  #calc1 .result.negative .result-verdict { color: #991b1b; }
+
+  /* ══════════════════════════════════════════
+     CALCULATOR 2 — CS Loan (Jaymo)
+  ══════════════════════════════════════════ */
+  #calc2 .card {
+    background: #ffffff;
+    border-radius: 24px;
+    box-shadow: 0 20px 40px -8px rgba(0,0,0,0.12), 0 8px 16px -4px rgba(0,0,0,0.06);
+    width: 100%;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+  }
+  #calc2 .header {
+    background: linear-gradient(135deg, #1e293b 0%, #2d3f58 100%);
+    padding: 32px;
+    color: white;
+    text-align: center;
+  }
+  #calc2 .logo-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #f97316; display: inline-block;
+    margin-right: 6px; vertical-align: middle;
+  }
+  #calc2 .header span { font-size: 11px; font-weight: 600; letter-spacing: 2px; opacity: 0.8; text-transform: uppercase; }
+  #calc2 .header h1 { font-family: 'Playfair Display', serif; font-size: 24px; margin-top: 8px; }
+  #calc2 .tabs {
+    display: flex; background: #f1f5f9; padding: 6px;
+    margin: 20px 32px 0; border-radius: 12px;
+  }
+  #calc2 .tab-btn {
+    flex: 1; padding: 12px; font-size: 12px; font-weight: 600;
+    color: #475569; border: none; background: none; cursor: pointer;
+    border-radius: 8px; transition: 0.2s;
+  }
+  #calc2 .tab-btn.active { background: #ffffff; color: #f97316; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+  #calc2 .tab-content { display: none; padding: 24px 32px 32px; }
+  #calc2 .tab-content.active { display: block; }
+  #calc2 .field-group { display: flex; flex-direction: column; gap: 20px; position: relative; }
+  #calc2 .field { flex: 1; }
+  #calc2 .field label {
+    display: block; font-size: 11px; font-weight: 700; text-transform: uppercase;
+    margin-bottom: 8px; color: #1e293b; letter-spacing: 0.5px;
+  }
+  #calc2 .field input {
+    width: 100%; padding: 14px; border: 1.5px solid #e2e8f0;
+    border-radius: 12px; font-size: 16px; outline: none; transition: 0.2s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  #calc2 .field input:focus { border-color: #f97316; box-shadow: 0 0 0 4px rgba(249,115,22,0.15); }
+  #calc2 .clear-container { display: flex; justify-content: flex-end; margin-bottom: 10px; }
+  #calc2 .btn-clear {
+    background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0;
+    padding: 5px 12px; border-radius: 6px; font-size: 11px; font-weight: 700;
+    text-transform: uppercase; cursor: pointer; transition: 0.2s;
+  }
+  #calc2 .btn-clear:hover { background: #e2e8f0; color: #ea580c; border-color: #cbd5e1; }
+  #calc2 .results {
+    display: none; border-top: 1px dashed #e2e8f0; padding-top: 24px;
+    animation: c2fadeIn 0.3s ease-out;
+  }
+  #calc2 .results.visible { display: block; }
+  @keyframes c2fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  #calc2 .result-primary {
+    background: #fff7ed; border-radius: 16px; padding: 20px; text-align: center;
+    margin-bottom: 16px; border: 1px solid #fed7aa;
+  }
+  #calc2 .result-primary small {
+    font-size: 10px; font-weight: 700; color: #ea580c; text-transform: uppercase;
+    letter-spacing: 1px; display: block; margin-bottom: 4px;
+  }
+  #calc2 .result-primary .amount {
+    font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 900; color: #ea580c;
+  }
+  #calc2 .breakdown-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  #calc2 .breakdown-item.full {
+    grid-column: span 2; display: flex; justify-content: space-between;
+    align-items: center; background: #f8fafc; padding: 14px; border-radius: 12px; border: 1px solid #e2e8f0;
+  }
+  #calc2 .breakdown-item .label { font-size: 11px; color: #475569; font-weight: 500; }
+  #calc2 .breakdown-item .value { font-weight: 700; color: #1e293b; font-size: 14px; }
+  #calc2 .highlight-row { background: #3730a3 !important; border-color: #3730a3 !important; color: white; }
+  #calc2 .highlight-row .label { color: rgba(255,255,255,0.8); }
+  #calc2 .highlight-row .value { color: white; }
+  #calc2 .footer {
+    padding: 20px; background: #f8fafc; text-align: center; font-size: 11px;
+    color: #94a3b8; border-top: 1px solid #e2e8f0; font-style: italic;
+  }
+</style>
+</head>
+<body>
+
+<!-- ── Horizontal Selector ── -->
+<div class="selector-wrap">
+  <div class="selector-label">Select Calculator</div>
+  <div class="selector">
+    <button class="sel-btn active" onclick="showCalc('calc1', this)">CS Affordability<br>Calculator</button>
+    <button class="sel-btn" onclick="showCalc('calc2', this)">CS Loan<br>Calculator</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     CALCULATOR 1 — Affordability (Checkoff)
+══════════════════════════════════════════ -->
+<div class="calc-view active" id="calc1">
+  <div class="calc">
+    <div class="title-bar">
+      <h1>Premier Credit CS<br>Affordability Calculator</h1>
+      <p>Kenya Civil Service · Check-off Loan</p>
+    </div>
+    <div class="body">
+      <div style="display:flex; justify-content:flex-end; margin-bottom:-3px;">
+        <button id="c1clearBtn" onclick="c1clearAll()" style="font-family:'DM Sans',sans-serif; font-size:13px; font-weight:700; letter-spacing:0.05em; text-transform:uppercase; color:#111827; background:#f9fafb; border:1.5px solid #d1d5db; border-radius:6px; padding:5px 12px; cursor:pointer; transition:all 0.15s; outline:none;" onmousedown="this.style.borderColor='#f97316';this.style.color='#f97316';" onmouseup="setTimeout(()=>{this.style.borderColor='#d1d5db';this.style.color='#111827';},300);" onmouseleave="this.style.borderColor='#d1d5db';this.style.color='#111827';">Clear</button>
+      </div>
+      <div class="card">
+        <div class="field-label">Basic Salary</div>
+        <div class="input-wrap">
+          <span class="currency">KES</span>
+          <input class="inp" type="number" id="c1basic" placeholder="0" inputmode="numeric">
+        </div>
+      </div>
+      <div class="sec-card" id="c1leaveCard">
+        <div class="sec-header" onclick="c1toggleLeave()">
+          <span class="sec-label">Leave, Arrears &amp; One-time Allowances</span>
+          <span class="sec-arrow" id="c1leaveArrow">▸</span>
+        </div>
+        <div class="sec-body" id="c1leaveBody">
+          <div>
+            <div class="input-wrap">
+              <span class="currency">KES</span>
+              <input class="inp" type="number" id="c1oneTime" value="0" placeholder="0" inputmode="numeric">
+            </div>
+            <div id="c1payeRefRow" style="display:flex; justify-content:space-between; margin-top:5px; padding:0 2px;">
+              <span style="font-size:10px; color:var(--dim); font-family:'DM Mono',monospace; letter-spacing:0.04em;">30% PAYE</span>
+              <span style="font-size:10px; color:var(--dim); font-family:'DM Mono',monospace;" id="c1leavePayeAmt">KES 0</span>
+            </div>
+          </div>
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; padding-top:8px; border-top:1px solid var(--border2);">
+            <span style="font-size:10px; color:var(--muted); flex:1; line-height:1.4;">Include 30% PAYE in affordability?<br><span style="font-size:9px; color:var(--dim);">Yes = deduct 70% · No = deduct 100%</span></span>
+            <div style="display:flex; gap:5px;">
+              <button class="tbtn yes active" id="c1btnYes" onclick="c1setToggle(true)">Yes</button>
+              <button class="tbtn no" id="c1btnNo" onclick="c1setToggle(false)">No</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="sec-card" id="c1statCard">
+        <div class="sec-header" onclick="c1toggleStat()">
+          <span class="sec-label">Statutory Reservation</span>
+          <span class="sec-arrow" id="c1statArrow">▸</span>
+        </div>
+        <div class="sec-body" id="c1statBody">
+          <div style="display:flex; gap:7px; align-items:flex-end;">
+            <div style="flex:1;">
+              <div style="font-size:10px; color:var(--dim); letter-spacing:0.05em; text-transform:uppercase; margin-bottom:4px;">Gross Earnings</div>
+              <div class="input-wrap"><span class="currency">KES</span><input class="inp" type="number" id="c1statGross" value="0" placeholder="0" inputmode="numeric" style="font-size:14px; height:32px;"></div>
+            </div>
+            <div style="width:70px;">
+              <div style="font-size:10px; color:var(--dim); letter-spacing:0.05em; text-transform:uppercase; margin-bottom:4px;">Reserve %</div>
+              <div class="input-wrap" style="border-radius:9px; overflow:hidden;">
+                <input class="inp" type="number" id="c1statPct" value="0" placeholder="0" inputmode="decimal" min="0" max="100" style="font-size:14px; height:32px; padding:0 4px; text-align:center; width:100%; min-width:0;">
+              </div>
+            </div>
+            <div style="flex:1;">
+              <div style="font-size:10px; color:var(--dim); letter-spacing:0.05em; text-transform:uppercase; margin-bottom:4px;">Current Deduction</div>
+              <div class="input-wrap"><span class="currency">KES</span><input class="inp" type="number" id="c1statCurrent" value="0" placeholder="0" inputmode="numeric" style="font-size:14px; height:32px;"></div>
+            </div>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:10px; color:var(--dim); margin-top:2px;">
+            <span>Deducted from affordability</span>
+            <span id="c1statDiff" style="font-family:'DM Mono',monospace;">KES 0</span>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="field-label">Net Pay</div>
+        <div class="input-wrap">
+          <span class="currency">KES</span>
+          <input class="inp" type="number" id="c1netPay" placeholder="0" inputmode="numeric">
+        </div>
+      </div>
+      <div class="below-fold hidden" id="c1belowFold">
+        <div class="adj-row">
+          <span>Adj. Net Pay</span>
+          <span class="adj-val" id="c1brkFinal">KES —</span>
+        </div>
+        <div class="result" id="c1result">
+          <div class="result-tag">Affordability</div>
+          <div class="result-num" id="c1resultNum">—</div>
+          <div class="result-verdict" id="c1resultVerdict"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     CALCULATOR 2 — CS Loan (Jaymo)
+══════════════════════════════════════════ -->
+<div class="calc-view" id="calc2">
+  <div class="card">
+    <div class="header">
+      <span><span class="logo-dot"></span>Premier Credit</span>
+      <h1>CS Loan Calculator</h1>
+    </div>
+    <div class="tabs">
+      <button class="tab-btn active" onclick="c2switchTab('c2tab1', this)">REPAYMENT</button>
+      <button class="tab-btn" onclick="c2switchTab('c2tab2', this)">QUALIFYING</button>
+    </div>
+    <div id="c2tab1" class="tab-content active">
+      <div class="clear-container">
+        <button class="btn-clear" onclick="c2clearFields('c2tab1')">Clear</button>
+      </div>
+      <div class="field-group">
+        <div class="field">
+          <label>Loan Amount (KES)</label>
+          <input type="number" id="c2t1-principal" placeholder="10,000" oninput="c2calculate()">
+        </div>
+        <div class="field">
+          <label>Loan Term (Months)</label>
+          <input type="number" id="c2t1-term" placeholder="120" oninput="c2calculate()">
+        </div>
+      </div>
+      <div id="c2t1-results" class="results">
+        <div class="result-primary">
+          <small>Monthly Deduction</small>
+          <div class="amount" id="c2t1-monthly">KES 0.00</div>
+        </div>
+        <div class="breakdown-grid">
+          <div class="breakdown-item full"><span class="label">Total Interest</span><span class="value" id="c2t1-interest">KES 0.00</span></div>
+          <div class="breakdown-item full highlight-row"><span class="label">Total Repayment</span><span class="value" id="c2t1-total">KES 0.00</span></div>
+        </div>
+      </div>
+    </div>
+    <div id="c2tab2" class="tab-content">
+      <div class="clear-container">
+        <button class="btn-clear" onclick="c2clearFields('c2tab2')">Clear</button>
+      </div>
+      <div class="field-group">
+        <div class="field">
+          <label>Monthly Deduction (Rounded KES)</label>
+          <input type="number" id="c2t2-deduction" placeholder="e.g. 2541" oninput="c2calculate()">
+        </div>
+        <div class="field">
+          <label>Desired Term (Months)</label>
+          <input type="number" id="c2t2-term" placeholder="120" oninput="c2calculate()">
+        </div>
+      </div>
+      <div id="c2t2-results" class="results">
+        <div class="result-primary">
+          <small>Qualifying Loan Amount</small>
+          <div class="amount" id="c2t2-qualify">KES 0.00</div>
+        </div>
+        <div class="breakdown-grid">
+          <div class="breakdown-item full"><span class="label">Total Interest</span><span class="value" id="c2t2-interest">KES 0.00</span></div>
+          <div class="breakdown-item full highlight-row"><span class="label">Total Repayment</span><span class="value" id="c2t2-total">KES 0.00</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="footer">"Your Premier Choice...in Credit"</div>
+  </div>
+</div>
+
+<script>
+  /* ── Switcher ── */
+  function showCalc(id, btn) {
+    document.querySelectorAll('.calc-view').forEach(v => v.classList.remove('active'));
+    document.querySelectorAll('.sel-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    btn.classList.add('active');
+  }
+
+  /* ════════════════════════════
+     CALC 1 — Affordability logic
+  ════════════════════════════ */
+  let c1statOpen = false, c1leaveOpen = false, c1includePaye = true;
+
+  function c1setToggle(val) {
+    c1includePaye = val;
+    document.getElementById('c1btnYes').classList.toggle('active', val);
+    document.getElementById('c1btnNo').classList.toggle('active', !val);
+    document.getElementById('c1payeRefRow').style.display = val ? 'flex' : 'none';
+    c1update();
+  }
+  function c1toggleLeave() {
+    c1leaveOpen = !c1leaveOpen;
+    document.getElementById('c1leaveBody').style.display = c1leaveOpen ? 'flex' : 'none';
+    document.getElementById('c1leaveArrow').textContent  = c1leaveOpen ? '▾' : '▸';
+    document.getElementById('c1leaveCard').style.opacity = c1leaveOpen ? '0.85' : '0.55';
+    c1update();
+  }
+  function c1toggleStat() {
+    c1statOpen = !c1statOpen;
+    document.getElementById('c1statBody').style.display  = c1statOpen ? 'flex' : 'none';
+    document.getElementById('c1statArrow').textContent   = c1statOpen ? '▾' : '▸';
+    document.getElementById('c1statCard').style.opacity  = c1statOpen ? '0.85' : '0.55';
+    c1update();
+  }
+  function c1fmt(n) { return 'KES ' + Math.floor(Math.abs(n)).toLocaleString('en-KE'); }
+  function c1clearAll() {
+    ['c1basic','c1oneTime','c1netPay','c1statGross','c1statPct','c1statCurrent'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+    c1includePaye = true;
+    document.getElementById('c1btnYes').classList.add('active');
+    document.getElementById('c1btnNo').classList.remove('active');
+    document.getElementById('c1payeRefRow').style.display = 'flex';
+    c1leaveOpen = false;
+    document.getElementById('c1leaveBody').style.display = 'none';
+    document.getElementById('c1leaveArrow').textContent  = '▸';
+    document.getElementById('c1leaveCard').style.opacity = '0.55';
+    c1statOpen = false;
+    document.getElementById('c1statBody').style.display  = 'none';
+    document.getElementById('c1statArrow').textContent   = '▸';
+    document.getElementById('c1statCard').style.opacity  = '0.55';
+    document.getElementById('c1leavePayeAmt').textContent = 'KES 0';
+    document.getElementById('c1statDiff').textContent     = 'KES 0';
+    document.getElementById('c1belowFold').classList.add('hidden');
+  }
+  function c1update() {
+    const basic       = parseFloat(document.getElementById('c1basic').value)       || 0;
+    const oneTime     = parseFloat(document.getElementById('c1oneTime').value)     || 0;
+    const netPay      = parseFloat(document.getElementById('c1netPay').value)      || 0;
+    const statGross   = parseFloat(document.getElementById('c1statGross').value)   || 0;
+    const statPct     = parseFloat(document.getElementById('c1statPct').value)     || 0;
+    const statCurrent = parseFloat(document.getElementById('c1statCurrent').value) || 0;
+    const paye30      = oneTime * 0.30;
+    const reserved    = statGross * statPct / 100;
+    const statDiff    = Math.max(0, reserved - statCurrent);
+    const leaveDeduct = c1includePaye ? (oneTime - paye30) : oneTime;
+    const adjNet      = netPay - leaveDeduct - statDiff;
+    const third       = basic / 3;
+    const total       = adjNet - third;
+    document.getElementById('c1statDiff').textContent     = statDiff > 0 ? c1fmt(statDiff) : 'KES 0';
+    document.getElementById('c1leavePayeAmt').textContent = c1fmt(paye30);
+    const fold = document.getElementById('c1belowFold');
+    if (basic > 0) {
+      fold.classList.remove('hidden');
+    } else {
+      fold.classList.add('hidden');
+      return;
+    }
+    document.getElementById('c1brkFinal').textContent = c1fmt(adjNet);
+    const res  = document.getElementById('c1result');
+    const num  = document.getElementById('c1resultNum');
+    const verd = document.getElementById('c1resultVerdict');
+    if (total >= 0) {
+      res.className    = 'result positive';
+      num.textContent  = '+' + c1fmt(total);
+      verd.textContent = 'Qualifies for this check-off loan.';
+    } else {
+      res.className    = 'result negative';
+      num.textContent  = '−' + c1fmt(total);
+      verd.textContent = 'Does not qualify — shortfall after ⅓ basic reserve.';
+    }
+  }
+  document.querySelectorAll('#calc1 .inp').forEach(el => el.addEventListener('input', c1update));
+  c1update();
+
+  /* ════════════════════════════
+     CALC 2 — CS Loan logic
+  ════════════════════════════ */
+  const C2_FIXED_FEE = 240, C2_ONE_OFF_RATE = 0.125;
+  const C2_RATE_TIERS = [
+    { max: 12, r: 1.06248 }, { max: 24, r: 0.860136 }, { max: 36, r: 0.704984 },
+    { max: 48, r: 0.55688 }, { max: 60, r: 0.519275 }, { max: 84, r: 0.462562 },
+    { max: 96, r: 0.452381 }, { max: 108, r: 0.4195 }, { max: 120, r: 0.4122 }
+  ];
+  const c2fmt = n => "KES " + n.toLocaleString('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const c2fmtWhole = n => "KES " + Math.round(n).toLocaleString('en-KE');
+
+  function c2switchTab(id, btn) {
+    document.querySelectorAll('#calc2 .tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('#calc2 .tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    btn.classList.add('active');
+    c2calculate();
+  }
+  function c2clearFields(tabId) {
+    if(tabId === 'c2tab1') {
+      document.getElementById('c2t1-principal').value = '';
+      document.getElementById('c2t1-term').value = '';
+      document.getElementById('c2t1-results').classList.remove('visible');
+    } else {
+      document.getElementById('c2t2-deduction').value = '';
+      document.getElementById('c2t2-term').value = '';
+      document.getElementById('c2t2-results').classList.remove('visible');
+    }
+  }
+  function c2calculate() {
+    const isTab1 = document.getElementById('c2tab1').classList.contains('active');
+    const termInput = document.getElementById(isTab1 ? 'c2t1-term' : 'c2t2-term').value;
+    const term = termInput ? parseInt(termInput) : 120;
+    if (term < 1) return;
+    const tier = C2_RATE_TIERS.find(t => term <= t.max) || C2_RATE_TIERS[C2_RATE_TIERS.length - 1];
+    const i = tier.r / 12;
+    const factor = Math.pow(1 + i, term);
+    if (isTab1) {
+      const principalInput = document.getElementById('c2t1-principal').value;
+      const P = principalInput ? parseFloat(principalInput) : 10000;
+      const P_amort = P * (1 + C2_ONE_OFF_RATE);
+      const M_amort = Math.round((P_amort * (i * factor) / (factor - 1)) * 100) / 100;
+      const M_regular = M_amort + C2_FIXED_FEE;
+      let currentBalance = P_amort;
+      for(let m = 1; m < term; m++) {
+        let interest = Math.round((currentBalance * i) * 100) / 100;
+        currentBalance -= (M_amort - interest);
+      }
+      const finalInstallment = Math.round((currentBalance + (currentBalance * i) + C2_FIXED_FEE) * 100) / 100;
+      const totalRepayment = (M_regular * (term - 1)) + finalInstallment;
+      document.getElementById('c2t1-monthly').textContent = c2fmt(M_regular);
+      document.getElementById('c2t1-interest').textContent = c2fmt(totalRepayment - (P + (P * C2_ONE_OFF_RATE) + (C2_FIXED_FEE * term)));
+      document.getElementById('c2t1-total').textContent = c2fmt(totalRepayment);
+      document.getElementById('c2t1-results').classList.toggle('visible', !!principalInput);
+    } else {
+      const deductionInput = document.getElementById('c2t2-deduction').value;
+      if (!deductionInput) {
+        document.getElementById('c2t2-results').classList.remove('visible');
+        return;
+      }
+      const M_total = Math.round(parseFloat(deductionInput));
+      const M_amort = M_total - C2_FIXED_FEE;
+      const P_amort = M_amort * (factor - 1) / (i * factor);
+      const P = Math.round(P_amort / (1 + C2_ONE_OFF_RATE));
+      let currentBalance = P * (1 + C2_ONE_OFF_RATE);
+      for(let m = 1; m < term; m++) {
+        let interest = Math.round((currentBalance * i) * 100) / 100;
+        currentBalance -= (M_amort - interest);
+      }
+      const finalInstallment = Math.round((currentBalance + (currentBalance * i) + C2_FIXED_FEE) * 100) / 100;
+      const totalRepayment = (M_total * (term - 1)) + finalInstallment;
+      document.getElementById('c2t2-qualify').textContent = c2fmtWhole(P);
+      document.getElementById('c2t2-interest').textContent = c2fmt(totalRepayment - (P * (1 + C2_ONE_OFF_RATE) + (C2_FIXED_FEE * term)));
+      document.getElementById('c2t2-total').textContent = c2fmt(totalRepayment);
+      document.getElementById('c2t2-results').classList.add('visible');
+    }
+  }
+</script>
+</body>
+</html>
